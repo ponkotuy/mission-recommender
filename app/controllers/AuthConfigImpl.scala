@@ -1,6 +1,6 @@
 package controllers
 
-import jp.t2v.lab.play2.auth.AuthConfig
+import jp.t2v.lab.play2.auth.{AuthConfig, CookieTokenAccessor}
 import models.Account
 import play.api.mvc.Results._
 import play.api.mvc.{RequestHeader, Result}
@@ -33,4 +33,8 @@ trait AuthConfigImpl extends AuthConfig {
 
   override def authenticationFailed(request: RequestHeader)(implicit ec: ExecutionContext): Future[Result] =
     Future.successful(Forbidden("Authentication failed"))
+
+  override lazy val tokenAccessor = new CookieTokenAccessor(
+    cookieSecureOption = false
+  )
 }
