@@ -1,5 +1,6 @@
 package responses
 
+import models.MissionState
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads}
 import play.api.libs.ws.WSClient
@@ -58,7 +59,9 @@ case class JSMissionWithPortals(
     latitude: Double,
     longitude: Double,
     distance: Double,
-    portals: Seq[Portal]) extends MissionWithPortals
+    portals: Seq[Portal]) extends MissionWithPortals {
+  override def state: Option[MissionState] = None
+}
 
 object JSMission {
   implicit val missionReads: Reads[JSMission] = (

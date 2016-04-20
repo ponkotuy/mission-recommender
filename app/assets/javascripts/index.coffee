@@ -1,9 +1,9 @@
 $(document).ready ->
   message = messages()
-  recommend = renderingWhite(message)
+  recommend = recommends(message)
   form = forms(recommend)
 
-renderingWhite = (message) ->
+recommends = (message) ->
   new Vue
     el: '#recommend'
     data:
@@ -18,6 +18,12 @@ renderingWhite = (message) ->
           if error.status == 403
             location.href = '/session'
           message.setError(error.responseText)
+      clear: (idx) ->
+        $.post "/api/mission/#{@missions[idx].id}/clear"
+        @missions[idx].isClear = true
+      feedback: (idx, v) ->
+        $.post "/api/mission/#{@missions[idx].id}/feedback", {feedback: v}
+        @missions[idx].feedback += v
 
 forms = (recommend) ->
   new Vue

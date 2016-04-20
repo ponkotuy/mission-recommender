@@ -45,11 +45,20 @@
       </form>
 
       <table class="table table-condensed table-striped" id="recommend">
-        <tr><th>Name</th><th>To</th><th>Around</th></tr>
+        <tr><th>Name</th><th>To</th><th>Around</th><th></th></tr>
         <tr v-for="m in missions">
           <td>{{ m.name }}</td>
           <td>{{ m.to.toFixed(1) }} m</td>
           <td>{{ m.around.toFixed(1) }} m</td>
+          <td>
+            <button type="button" class="btn btn-xs" @click="clear($index)" v-if="!m.isClear">Clear</button>
+            <button type="button" class="btn btn-xs" @click="feedback($index, 1)" v-if="m.feedback <= 0">
+              <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true" />
+            </button>
+            <button type="button" class="btn btn-xs" v-on:click="feedback($index, -1)" v-if="0 <= m.feedback">
+              <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true" />
+            </button>
+          </td>
         </tr>
       </table>
     </div>

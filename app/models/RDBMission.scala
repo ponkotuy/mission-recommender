@@ -10,7 +10,8 @@ case class RDBMission(
     intro: String,
     latitude: Double,
     longitude: Double,
-    portals: Seq[RDBPortal] = Nil) extends MissionWithPortals
+    portals: Seq[RDBPortal] = Nil,
+    state: Option[MissionState] = None) extends MissionWithPortals
 
 object RDBMission extends SkinnyCRUDMapperWithId[Int, RDBMission] {
   override val tableName = "mission"
@@ -23,7 +24,8 @@ object RDBMission extends SkinnyCRUDMapperWithId[Int, RDBMission] {
 
   override def defaultAlias: Alias[RDBMission] = createAlias("m")
 
-  override def extract(rs: WrappedResultSet, n: scalikejdbc.ResultName[RDBMission]): RDBMission = autoConstruct(rs, n, "portals")
+  override def extract(rs: WrappedResultSet, n: scalikejdbc.ResultName[RDBMission]): RDBMission =
+    autoConstruct(rs, n, "portals", "state")
 
   lazy val portalsRef = hasManyThrough[MissionPortal, RDBPortal](
     through = MissionPortal -> MissionPortal.defaultAlias,
@@ -32,4 +34,15 @@ object RDBMission extends SkinnyCRUDMapperWithId[Int, RDBMission] {
     on = (mp: Alias[MissionPortal], p: Alias[RDBPortal]) => sqls.eq(mp.portalId, p.id),
     merge = (mission, portals) => mission.copy(portals = portals)
   )
+
+  def stateRef(userId: Long) = {
+    val m = defaultAlias
+    val ms = MissionState.defaultAlias
+    hasOneWithFkAndJoinCondition[MissionState](
+      right = MissionState,
+      fk = "missionId",
+      on = sqls.eq(ms.missionId, m.id).and.eq(ms.userId, userId),
+      merge = (mission, state) => mission.copy(state = state)
+    )
+  }
 }

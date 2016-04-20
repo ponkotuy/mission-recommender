@@ -1,6 +1,6 @@
 package responses
 
-import models.{MissionPortal, RDBMission}
+import models.{MissionPortal, MissionState, RDBMission}
 import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSClient
 import scalikejdbc.DBSession
@@ -16,8 +16,8 @@ trait Mission {
   def longitude: Double
   lazy val location: Location = Location(latitude, longitude)
 
-  def withPortalFromDB()(implicit session: DBSession): Option[RDBMission] =
-    RDBMission.joins(RDBMission.portalsRef).findById(id).filter(_.portals.nonEmpty)
+  def withPortalFromDB(userId: Long)(implicit session: DBSession): Option[RDBMission] =
+    RDBMission.joins(RDBMission.portalsRef).joins(RDBMission.stateRef(userId)).findById(id).filter(_.portals.nonEmpty)
 
   def getPortal()(implicit ex: ExecutionContext, ws: WSClient): Future[PortalResponse] = PortalResponse.get(id)
 
@@ -31,6 +31,7 @@ trait Mission {
 
 trait MissionWithPortals extends Mission {
   def portals: Seq[Portal]
+  def state: Option[MissionState]
 
   lazy val portalDistance = portals.sliding(2).map { case Seq(x, y) =>
     x.location.distance(y.location)
@@ -43,19 +44,29 @@ trait MissionWithPortals extends Mission {
     }
   }
 
-  def recommend(here: Location) = Recommend(name, here.distance(location), portalDistance)
+  def recommend(here: Location) =
+    Recommend(id, name, here.distance(location), portalDistance, state.exists(_.isClear), state.map(_.feedback).getOrElse(0))
 }
 
-case class Recommend(name: String, to: Double, around: Double) extends Ordered[Recommend] {
+case class Recommend(
+    id: Int,
+    name: String,
+    to: Double,
+    around: Double,
+    isClear: Boolean,
+    feedback: Int) extends Ordered[Recommend] {
   override def compare(that: Recommend): Int = Recommend.ordering.compare(this, that)
 }
 
 object Recommend {
   implicit val recommendWrites = new Writes[Recommend] {
     def writes(x: Recommend) = Json.obj(
+      "id" -> x.id,
       "name" -> x.name,
       "to" -> x.to,
-      "around" -> x.around
+      "around" -> x.around,
+      "isClear" -> x.isClear,
+      "feedback" -> x.feedback
     )
   }
 
