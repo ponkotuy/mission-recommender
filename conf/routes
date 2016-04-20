@@ -1,2 +1,6 @@
 
-GET / controllers.Root.index()
+GET / controllers.Assets.at(path="/public", file="index.html")
+
+GET /api/missions controllers.API.missions(lat: Double, lng: Double, meter: Int ?= 200)
+
+GET /js/:file controllers.Assets.at(path="/public/javascripts", file)

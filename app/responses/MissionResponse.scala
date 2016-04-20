@@ -3,7 +3,7 @@ package responses
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads}
 import play.api.libs.ws.WSClient
-import utils.{Get, Location}
+import utils.{Get, Location, Region}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,16 +17,14 @@ object MissionResponse {
       (JsPath \ "mission").read[Seq[JSMission]]
     )(MissionResponse.apply _)
 
-  val DiffLat = 0.002
-  val DiffLng = 0.003
-  def get(location: Location)(implicit ex: ExecutionContext, ws: WSClient): Future[MissionResponse] = {
+  def get(location: Location, region: Region)(implicit ex: ExecutionContext, ws: WSClient): Future[MissionResponse] = {
     val params = Map[String, String](
       "center[lat]" -> location.lat.toString,
       "center[lng]" -> location.lng.toString,
-      "bounds[ne][lat]" -> (location.lat + DiffLat).toString,
-      "bounds[ne][lng]" -> (location.lng + DiffLng).toString,
-      "bounds[sw][lat]" -> (location.lat - DiffLat).toString,
-      "bounds[sw][lng]" -> (location.lng - DiffLng).toString,
+      "bounds[ne][lat]" -> region.north.toString,
+      "bounds[ne][lng]" -> region.east.toString,
+      "bounds[sw][lat]" -> region.south.toString,
+      "bounds[sw][lng]" -> region.west.toString,
       "rid" -> "10441"
     )
     val url = Get.withParams(s"${IngressMM.BaseURL}get_mission.php")(params)

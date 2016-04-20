@@ -2,16 +2,12 @@ package utils
 
 
 case class Location(lat: Double, lng: Double) {
-  import Location._
-
-  def distance(other: Location): Double = {
-    import scala.math._
-    Radius * acos(sin(rad(lat)) * sin(rad(other.lat)) + cos(rad(lat)) * cos(rad(other.lat)) * cos(rad(other.lng) - rad(lng)))
+  def distance(other: Location): Double = Distance.periodLocation(this, other)
+  def regionFromMeter(meter: Int) = {
+    val pLat = Distance.fromMeterToLatitude(meter)
+    val pLng = Distance.fromMeterToLongitude(meter, lat)
+    Region(lat + pLat, lat - pLat, lng + pLng, lng - pLng)
   }
-
-  def rad(d: Double) = d * math.Pi / 180
 }
 
-object Location {
-  val Radius = 6378137.0
-}
+case class Region(north: Double, south: Double, east: Double, west: Double)

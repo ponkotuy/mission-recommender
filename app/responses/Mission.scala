@@ -1,6 +1,7 @@
 package responses
 
 import models.{MissionPortal, RDBMission}
+import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSClient
 import scalikejdbc.DBSession
 import utils.Location
@@ -41,4 +42,22 @@ trait MissionWithPortals extends Mission {
       MissionPortal.createWithAttributes('missionId -> id, 'portalId -> p.id, 'no -> i)
     }
   }
+
+  def recommend(here: Location) = Recommend(name, here.distance(location), portalDistance)
+}
+
+case class Recommend(name: String, to: Double, around: Double) extends Ordered[Recommend] {
+  override def compare(that: Recommend): Int = Recommend.ordering.compare(this, that)
+}
+
+object Recommend {
+  implicit val recommendWrites = new Writes[Recommend] {
+    def writes(x: Recommend) = Json.obj(
+      "name" -> x.name,
+      "to" -> x.to,
+      "around" -> x.around
+    )
+  }
+
+  val ordering: Ordering[Recommend] = Ordering.by { r => r.to * 2 + r.around }
 }
