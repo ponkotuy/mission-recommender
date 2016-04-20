@@ -26,6 +26,6 @@ object Recommend {
   }
 
   val ordering: Ordering[Recommend] = Ordering.by { r =>
-    if(r.isClear || r.feedback < 0) Double.MaxValue else r.to * 2 + r.around
+    if(r.isClear || r.feedback < 0) Double.MaxValue else if(r.feedback > 0) 0 else r.to * 2 + r.around
   }
 }
