@@ -1,9 +1,10 @@
 package controllers
 
 import com.google.inject.Inject
+import jp.t2v.lab.play2.auth.AuthenticationElement
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 import responses.MissionResponse
 import scalikejdbc.{AutoSession, DB}
 import utils.Location
@@ -11,9 +12,9 @@ import utils.Location
 import scala.collection.breakOut
 import scala.concurrent.{ExecutionContext, Future}
 
-class API @Inject()(implicit ec: ExecutionContext, ws: WSClient) extends Controller {
+class API @Inject()(implicit ec: ExecutionContext, ws: WSClient) extends Controller with AuthenticationElement with AuthConfigImpl {
   import responses.Recommend.recommendWrites
-  def missions(lat: Double, lng: Double, meter: Int) = Action.async {
+  def missions(lat: Double, lng: Double, meter: Int) = AsyncStack { _ =>
     val here = Location(lat, lng)
     val region = here.regionFromMeter(meter)
     val res = for {

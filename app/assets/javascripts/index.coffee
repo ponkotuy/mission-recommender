@@ -7,7 +7,7 @@ renderingWhite = (message) ->
   new Vue
     el: '#recommend'
     data:
-      missions: [{name: "a", to: 1.0, around: 2.0}]
+      missions: []
     methods:
       getMission: (params) ->
         getting = $.getJSON '/api/missions', params
@@ -15,6 +15,8 @@ renderingWhite = (message) ->
           @missions = json
           message.removeError()
         getting.error (error) =>
+          if error.status == 403
+            location.href = '/session'
           message.setError(error.responseText)
 
 forms = (recommend) ->

@@ -1,0 +1,17 @@
+@(form: Form[forms.Login])(implicit messages: Messages)
+
+@main {
+  <title>Login</title>
+} {
+  <div class="container" role="main">
+    @helper.form(action = routes.Session.login()) {
+      <div class="form-group">
+        @helper.inputText(form("name"), 'id -> "name", 'class -> "form-control")
+      </div>
+      <div class="form-group">
+        @helper.inputPassword(form("password"), 'id -> "password", 'class -> "form-control")
+      </div>
+      <button type="submit" class="btn btn-default">Login</button>
+    }
+  </div>
+}

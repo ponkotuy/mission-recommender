@@ -1,5 +1,7 @@
 
 GET / controllers.Assets.at(path="/public", file="index.html")
+GET /session controllers.Session.view()
+POST /session controllers.Session.login()
 
 GET /api/missions controllers.API.missions(lat: Double, lng: Double, meter: Int ?= 200)
 
