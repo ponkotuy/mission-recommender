@@ -6,5 +6,6 @@ POST /session controllers.Session.login()
 GET /api/missions controllers.API.missions(lat: Double, lng: Double, meter: Int ?= 200)
 POST /api/mission/:id/clear controllers.API.missionClear(id: Int)
 POST /api/mission/:id/feedback controllers.API.missionFeedback(id: Int)
+GET /api/location/:name controllers.API.location(name: String)
 
 GET /js/:file controllers.Assets.at(path="/public/javascripts", file)

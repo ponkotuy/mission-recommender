@@ -28,7 +28,7 @@
       <form class="form-inline" id="control">
         <div class="form-group">
           <label for="latitude">Latitude</label>
-          <input type="text" class="form-control" id="latittude" v-model="pos.lat">
+          <input type="text" class="form-control" id="latitude" v-model="pos.lat">
         </div>
 
         <div class="form-group">
@@ -44,6 +44,15 @@
         <button type="button" class="btn btn-default" @click="change()">Change</button>
       </form>
 
+      <form class="form-inline" id="location" @submit.prevent="search()">
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input type="text" class="form-control" id="address" v-model="address">
+        </div>
+
+        <button type="button" class="btn btn-default" @click="search()">Search</button>
+      </form>
+
       <table class="table table-condensed table-striped" id="recommend">
         <tr><th>Name</th><th>To</th><th>Around</th><th></th></tr>
         <tr v-for="m in missions">
@@ -53,10 +62,10 @@
           <td>
             <button type="button" class="btn btn-xs" @click="clear($index)" v-if="!m.isClear">Clear</button>
             <button type="button" class="btn btn-xs" @click="feedback($index, 1)" v-if="m.feedback <= 0">
-              <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true" />
+              <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
             </button>
-            <button type="button" class="btn btn-xs" v-on:click="feedback($index, -1)" v-if="0 <= m.feedback">
-              <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true" />
+            <button type="button" class="btn btn-xs" @click="feedback($index, -1)" v-if="0 <= m.feedback">
+              <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
             </button>
           </td>
         </tr>

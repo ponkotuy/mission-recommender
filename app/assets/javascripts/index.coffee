@@ -2,6 +2,7 @@ $(document).ready ->
   message = messages()
   recommend = recommends(message)
   form = forms(recommend)
+  location = locations(form)
 
 recommends = (message) ->
   new Vue
@@ -36,11 +37,13 @@ forms = (recommend) ->
     methods:
       change: ->
         recommend.getMission({lat: @pos.lat, lng: @pos.lng, meter: parseInt(@meter)})
+      setLocation: (lat, lng) ->
+        @pos.lat = lat
+        @pos.lng = lng
+        @change()
     ready: ->
       navigator.geolocation.getCurrentPosition (pos) =>
-        @pos.lat = pos.coords.latitude
-        @pos.lng = pos.coords.longitude
-        @change()
+        @setLocation(pos.coords.latitude, pos.coords.longitude)
 
 messages = ->
   new Vue
@@ -54,3 +57,14 @@ messages = ->
         @isError = true
       removeError: ->
         @isError = false
+
+locations = (form) ->
+  new Vue
+    el: '#location'
+    data:
+      address: ""
+    methods:
+      search: ->
+        getting = $.getJSON "/api/location/#{@address}"
+        getting.success (json) =>
+          form.setLocation(json.latitude, json.longitude)

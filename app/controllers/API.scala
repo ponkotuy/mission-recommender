@@ -3,6 +3,7 @@ package controllers
 import com.google.inject.Inject
 import jp.t2v.lab.play2.auth.AuthenticationElement
 import models.MissionState
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
@@ -10,13 +11,16 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.Controller
 import responses.MissionResponse
 import scalikejdbc.{AutoSession, DB}
-import utils.Location
+import utils.{Geocoding, Location}
 
 import scala.collection.breakOut
 import scala.concurrent.{ExecutionContext, Future}
 
-class API @Inject()(implicit ec: ExecutionContext, ws: WSClient) extends Controller with AuthenticationElement with AuthConfigImpl {
+class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configuration) extends Controller with AuthenticationElement with AuthConfigImpl {
   import responses.Recommend.recommendWrites
+
+  lazy val geocoding = new Geocoding(config.getString("google.maps.key").get)
+
   def missions(lat: Double, lng: Double, meter: Int) = AsyncStack { implicit req =>
     val user = loggedIn
     val here = Location(lat, lng)
@@ -55,9 +59,16 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient) extends Control
     form.bindFromRequest().fold(
       _ => BadRequest("Required feedback parameter"),
       f => {
-        MissionState.updateFeedback(id, user.id, f.toInt)(AutoSession)
+        MissionState.updateFeedback(id, user.id, f)(AutoSession)
         Ok("Success")
       }
     )
+  }
+
+  def location(name: String) = StackAction { _ =>
+    geocoding.request(name).headOption.fold(NotFound("")) { geo =>
+      val location = geo.geometry.location
+      Ok(Json.obj("latitude" -> location.lat, "longitude" -> location.lng))
+    }
   }
 }
