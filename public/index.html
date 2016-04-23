@@ -57,7 +57,7 @@
         <tr><th>Name</th><th>To</th><th>Around</th><th></th></tr>
         <tr v-for="m in missions">
           <td>{{ m.name }}</td>
-          <td>{{ m.to.toFixed(1) }} m</td>
+          <td>{{ m.bearing }} {{ m.to.toFixed(1) }} m</td>
           <td>{{ m.around.toFixed(1) }} m</td>
           <td>
             <button type="button" class="btn btn-xs" @click="clear($index)" v-if="!m.isClear">Clear</button>
@@ -70,6 +70,10 @@
           </td>
         </tr>
       </table>
+
+      <ul>
+        <li>Toは最初のportalまでの距離、Aroundは全てのportalを回るのに移動する推定距離を示す</li>
+      </ul>
     </div>
   </body>
 </html>

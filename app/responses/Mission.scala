@@ -44,5 +44,13 @@ trait MissionWithPortals extends Mission {
   }
 
   def recommend(here: Location) =
-    Recommend(id, name, here.distance(location), portalDistance, state.exists(_.isClear), state.map(_.feedback).getOrElse(0))
+    Recommend(
+      id,
+      name,
+      here.distance(location),
+      portalDistance,
+      state.exists(_.isClear),
+      state.map(_.feedback).getOrElse(0),
+      here.vector(location).bearing.points16
+    )
 }

@@ -9,7 +9,9 @@ case class Recommend(
     to: Double,
     around: Double,
     isClear: Boolean,
-    feedback: Int) extends Ordered[Recommend] {
+    feedback: Int,
+    bearing: String
+) extends Ordered[Recommend] {
   override def compare(that: Recommend): Int = Recommend.ordering.compare(this, that)
 }
 
@@ -21,7 +23,8 @@ object Recommend {
       "to" -> x.to,
       "around" -> x.around,
       "isClear" -> x.isClear,
-      "feedback" -> x.feedback
+      "feedback" -> x.feedback,
+      "bearing" -> x.bearing
     )
   }
 
