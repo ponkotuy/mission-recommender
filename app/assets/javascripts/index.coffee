@@ -3,6 +3,8 @@ $(document).ready ->
   recommend = recommends(message)
   form = forms(recommend)
   location = locations(form)
+  name = names(form)
+  allClear = allClears(recommend)
 
 recommends = (message) ->
   new Vue
@@ -25,6 +27,10 @@ recommends = (message) ->
       feedback: (idx, v) ->
         $.post "/api/mission/#{@missions[idx].id}/feedback", {feedback: v}
         @missions[idx].feedback += v
+      allClear: ->
+        console.log("recommend.allClear")
+        @clear(i) for i in [0..@missions.length - 1]
+
 
 forms = (recommend) ->
   new Vue
@@ -41,6 +47,8 @@ forms = (recommend) ->
         @pos.lat = lat
         @pos.lng = lng
         @change()
+      searchName: (name) ->
+        recommend.getMission({lat: @pos.lat, lng: @pos.lng, q: name})
     ready: ->
       navigator.geolocation.getCurrentPosition (pos) =>
         @setLocation(pos.coords.latitude, pos.coords.longitude)
@@ -68,3 +76,19 @@ locations = (form) ->
         getting = $.getJSON "/api/location/#{@address}"
         getting.success (json) =>
           form.setLocation(json.latitude, json.longitude)
+
+names = (form) ->
+  new Vue
+    el: '#name'
+    data:
+      name: ""
+    methods:
+      search: ->
+        form.searchName(@name)
+
+allClears = (recommend) ->
+  new Vue
+    el: '#all_clear'
+    methods:
+      allClear: ->
+        recommend.allClear()

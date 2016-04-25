@@ -1,6 +1,7 @@
 package responses
 
 import models.{MissionPortal, MissionState, RDBMission}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.libs.ws.WSClient
 import scalikejdbc.DBSession
 import utils.Location
@@ -26,6 +27,18 @@ trait Mission {
 
   def save()(implicit session: DBSession) =
     RDBMission.createWithAttributes('id -> id, 'name -> name, 'intro -> intro, 'latitude -> latitude, 'longitude -> longitude)
+}
+
+object Mission {
+  implicit val missionWrites: Writes[Mission] = new Writes[Mission] {
+    override def writes(x: Mission): JsValue = Json.obj(
+      "id" -> x.id,
+      "name" -> x.name,
+      "intro" -> x.intro,
+      "latitude" -> x.latitude,
+      "longitude" -> x.longitude
+    )
+  }
 }
 
 trait MissionWithPortals extends Mission {

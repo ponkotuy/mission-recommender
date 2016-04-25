@@ -8,7 +8,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import play.api.mvc.Controller
+import play.api.mvc.{Controller, Result}
 import responses.MissionResponse
 import scalikejdbc.{AutoSession, DB}
 import utils.{Geocoding, Location}
@@ -17,26 +17,34 @@ import scala.collection.breakOut
 import scala.concurrent.{ExecutionContext, Future}
 
 class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configuration) extends Controller with AuthenticationElement with AuthConfigImpl {
-  import responses.Recommend.recommendWrites
-
   lazy val geocoding = new Geocoding(config.getString("google.maps.key").get)
 
-  def missions(lat: Double, lng: Double, meter: Int) = AsyncStack { implicit req =>
+  def missions(lat: Double, lng: Double, meter: Int, q: String) = AsyncStack { implicit req =>
     val user = loggedIn
     val here = Location(lat, lng)
+    if(q.isEmpty) localMissions(user.id, here, meter) else searchMissions(user.id, here, q)
+  }
+
+  private def localMissions(userId: Long, here: Location, meter: Int): Future[Result] = {
     val region = here.regionFromMeter(meter)
-    val res = for {
-      mRes <- MissionResponse.get(here, region)
-      fromDBs = mRes.mission.flatMap(_.withPortalFromDB(user.id)(AutoSession))
-      exists: Set[Int] = fromDBs.map(_.id)(breakOut)
-      fromWebs = mRes.mission.filterNot { m => exists.contains(m.id) }
-          .sortBy(_.distance).take(5)
-          .map { m =>
-            Thread.sleep(200L)
-            m.withPortalFromWeb()
-          }
-      xs <- Future.sequence(fromWebs)
-    } yield {
+    MissionResponse.get(here, region).flatMap { mRes => createResult(mRes, userId, here) }
+  }
+
+  private def searchMissions(userId: Long, here: Location, q: String): Future[Result] = {
+    MissionResponse.find(q).flatMap( mRes => createResult(mRes, userId, here))
+  }
+
+  private def createResult(mRes: MissionResponse, userId: Long, here: Location): Future[Result] = {
+    import responses.Recommend.recommendWrites
+    val fromDBs = mRes.mission.flatMap(_.withPortalFromDB(userId)(AutoSession))
+    val exists: Set[Int] = fromDBs.map(_.id)(breakOut)
+    val fromWebs = mRes.mission.filterNot { m => exists.contains(m.id) }
+        .sortBy(_.distance).take(5)
+        .map { m =>
+          Thread.sleep(200L)
+          m.withPortalFromWeb()
+        }
+    val res = Future.sequence(fromWebs).map { xs =>
       DB localTx { implicit session =>
         mRes.mission.foreach(_.saveIgnore())
         xs.foreach(_.savePortals())
@@ -44,8 +52,10 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
       val contents = (fromDBs ++ xs).map(_.recommend(here)).sorted
       Ok(Json.toJson(contents))
     }
-    res.fallbackTo(Future.successful(InternalServerError("Be perhaps over region.")))
+    futureRecover(res)
   }
+
+  def futureRecover(f: Future[Result]): Future[Result] = f.recover { case e => InternalServerError(e.getMessage) }
 
   def missionClear(id: Int) = StackAction { implicit req =>
     val user = loggedIn

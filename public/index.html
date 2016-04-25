@@ -53,7 +53,16 @@
         <button type="button" class="btn btn-default" @click="search()">Search</button>
       </form>
 
-      <table class="table table-condensed table-striped" id="recommend">
+      <form class="form-inline" id="name" @submit.prevent="search()">
+        <div class="form-group">
+          <label for="mission_name">Mission Name</label>
+          <input type="text" class="form-control" id="mission_name" v-model="name">
+        </div>
+
+        <button type="button" class="btn btn-default" @click="search()">Search</button>
+      </form>
+
+      <table class="table table-striped table-condensed" id="recommend">
         <tr><th>Name</th><th>To</th><th>Around</th><th></th></tr>
         <tr v-for="m in missions">
           <td>{{ m.name }}</td>
@@ -70,6 +79,10 @@
           </td>
         </tr>
       </table>
+
+      <form id="all_clear" @submit.prevent="allClear()">
+        <button type="button" class="btn btn-xs btn-warning" @click="allClear()">ALL CLEAR</button>
+      </form>
 
       <ul>
         <li>Toは最初のportalまでの距離、Aroundは全てのportalを回るのに移動する推定距離を示す</li>

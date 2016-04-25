@@ -18,7 +18,15 @@ object MissionResponse {
       (JsPath \ "mission").read[Seq[JSMission]]
     )(MissionResponse.apply _)
 
-  def get(location: Location, region: Region)(implicit ex: ExecutionContext, ws: WSClient): Future[MissionResponse] = {
+  def get(params: Map[String, String])(implicit ec: ExecutionContext, ws: WSClient): Future[MissionResponse] = {
+    val url = Get.withParams(s"${IngressMM.BaseURL}get_mission.php")(params)
+    ws.url(url).get().map { res =>
+      val json = Json.parse(res.body)
+      json.validate[MissionResponse].get
+    }
+  }
+
+  def get(location: Location, region: Region)(implicit ec: ExecutionContext, ws: WSClient): Future[MissionResponse] = {
     val params = Map[String, String](
       "center[lat]" -> location.lat.toString,
       "center[lng]" -> location.lng.toString,
@@ -28,12 +36,11 @@ object MissionResponse {
       "bounds[sw][lng]" -> region.west.toString,
       "rid" -> "10441"
     )
-    val url = Get.withParams(s"${IngressMM.BaseURL}get_mission.php")(params)
-    ws.url(url).get().map { res =>
-      val json = Json.parse(res.body)
-      json.validate[MissionResponse].get
-    }
+    get(params)
   }
+
+  def find(name: String)(implicit ec: ExecutionContext, ws: WSClient): Future[MissionResponse] =
+    get(Map("find" -> name, "findby" -> "0", "rid" -> "10441"))
 }
 
 case class JSMission(
@@ -70,6 +77,6 @@ object JSMission {
           (JsPath \ "intro").read[String] and
           (JsPath \ "latitude").read[Double] and
           (JsPath \ "longitude").read[Double] and
-          (JsPath \ "distance").read[String].map(_.toDouble)
+          ((JsPath \ "distance").read[String].map(_.toDouble) or (JsPath \ "distance").read[Double])
       )(JSMission.apply _)
 }
