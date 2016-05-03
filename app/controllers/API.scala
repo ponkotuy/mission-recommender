@@ -3,7 +3,7 @@ package controllers
 import com.google.inject.Inject
 import jp.t2v.lab.play2.auth.AuthenticationElement
 import models.MissionState
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
@@ -55,7 +55,10 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
     futureRecover(res)
   }
 
-  def futureRecover(f: Future[Result]): Future[Result] = f.recover { case e => InternalServerError(e.getMessage) }
+  def futureRecover(f: Future[Result]): Future[Result] = f.recover { case e =>
+    Logger.warn("Raise error in future", e)
+    InternalServerError(e.getMessage)
+  }
 
   def missionClear(id: Int) = StackAction { implicit req =>
     val user = loggedIn

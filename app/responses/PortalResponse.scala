@@ -6,7 +6,6 @@ import play.api.libs.ws.WSClient
 import utils.Get
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 case class PortalResponse(mission: Int, portal: Seq[JSPortal])
 
@@ -21,9 +20,9 @@ object PortalResponse {
   def get(mission: Int)(implicit ex: ExecutionContext, ws: WSClient): Future[PortalResponse] = {
     val params = Map("mission" -> mission.toString)
     val url = Get.withParams(s"${IngressMM.BaseURL}get_portal.php")(params)
-    ws.url(url).get().flatMap { res =>
+    ws.url(url).get().map { res =>
       val json = Json.parse(res.body)
-      Future.fromTry(Try(json.validate[PortalResponse].get))
+      json.validate[PortalResponse].getOrElse(throw new JSONParseError(res.body, getClass.getSimpleName))
     }
   }
 }

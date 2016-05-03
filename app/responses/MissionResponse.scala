@@ -22,7 +22,7 @@ object MissionResponse {
     val url = Get.withParams(s"${IngressMM.BaseURL}get_mission.php")(params)
     ws.url(url).get().map { res =>
       val json = Json.parse(res.body)
-      json.validate[MissionResponse].get
+      json.validate[MissionResponse].getOrElse(throw new JSONParseError(res.body, getClass.getSimpleName))
     }
   }
 
