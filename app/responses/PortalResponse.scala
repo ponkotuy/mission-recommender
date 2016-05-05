@@ -1,7 +1,7 @@
 package responses
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, Json, Reads}
+import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import utils.Get
 
@@ -14,7 +14,7 @@ object PortalResponse {
 
   implicit val responseReads: Reads[PortalResponse] = (
       (JsPath \ "mission").read[Int] and
-          (JsPath \ "portal").read[Seq[JSPortal]]
+          (JsPath \ "portal").read[Seq[WrappedJsPortal]].map(_.flatMap(_.content))
       )(PortalResponse.apply _)
 
   def get(mission: Int)(implicit ex: ExecutionContext, ws: WSClient): Future[PortalResponse] = {
@@ -31,10 +31,20 @@ case class JSPortal(id: Int, name: String, latitude: Double, longitude: Double, 
 
 object JSPortal {
   implicit val portalReads: Reads[JSPortal] = (
-      (JsPath(2) \ "id").read[String].map(_.toInt) and
-          (JsPath(2) \ "name").read[String] and
-          (JsPath(2) \ "latitude").read[Double] and
-          (JsPath(2) \ "longitude").read[Double] and
-          (JsPath(2) \ "type").read[String]
+      (JsPath \ "id").read[String].map(_.toInt) and
+          (JsPath \ "name").read[String] and
+          (JsPath \ "latitude").read[Double] and
+          (JsPath \ "longitude").read[Double] and
+          (JsPath \ "type").read[String]
       )(JSPortal.apply _)
+}
+
+case class WrappedJsPortal(b: Boolean, i: Option[Int], content: Option[JSPortal])
+
+object WrappedJsPortal {
+  implicit val wrapReads: Reads[WrappedJsPortal] = (
+      JsPath(0).read[Boolean] and
+          JsPath(1).readNullable[Int] and
+          JsPath(2).readNullable[JSPortal]
+      )(WrappedJsPortal.apply _)
 }
