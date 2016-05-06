@@ -26,6 +26,10 @@
       </div>
 
       <form class="form-inline" id="control">
+        <button type="button" class="btn btn-default" id="gps" @click="gps()">
+          <span class="glyphicon glyphicon-globe"></span>
+        </button>
+
         <div class="form-group">
           <label for="latitude">Latitude</label>
           <input type="text" class="form-control" id="latitude" v-model="pos.lat">

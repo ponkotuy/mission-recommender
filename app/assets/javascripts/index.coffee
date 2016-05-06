@@ -43,6 +43,9 @@ forms = (recommend) ->
     methods:
       change: ->
         recommend.getMission({lat: @pos.lat, lng: @pos.lng, meter: parseInt(@meter)})
+      gps: ->
+        navigator.geolocation.getCurrentPosition (pos) =>
+          @setLocation(pos.coords.latitude, pos.coords.longitude)
       setLocation: (lat, lng) ->
         @pos.lat = lat
         @pos.lng = lng
@@ -50,8 +53,7 @@ forms = (recommend) ->
       searchName: (name) ->
         recommend.getMission({lat: @pos.lat, lng: @pos.lng, q: name})
     ready: ->
-      navigator.geolocation.getCurrentPosition (pos) =>
-        @setLocation(pos.coords.latitude, pos.coords.longitude)
+      @gps()
 
 messages = ->
   new Vue
