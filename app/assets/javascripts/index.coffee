@@ -2,8 +2,8 @@ $(document).ready ->
   message = messages()
   recommend = recommends(message)
   form = forms(recommend)
-  location = locations(form)
-  name = names(form)
+  location = locations(form, message)
+  name = names(form, message)
   allClear = allClears(recommend)
 
 recommends = (message) ->
@@ -16,7 +16,10 @@ recommends = (message) ->
         getting = $.getJSON '/api/missions', params
         getting.success (json) =>
           @missions = json
-          message.removeError()
+          if @missions.length == 0
+            message.setError('Not found mission.')
+          else
+            message.removeError()
         getting.error (error) =>
           if error.status == 403
             location.href = '/session'
@@ -68,7 +71,7 @@ messages = ->
       removeError: ->
         @isError = false
 
-locations = (form) ->
+locations = (form, message) ->
   new Vue
     el: '#location'
     data:
@@ -78,6 +81,9 @@ locations = (form) ->
         getting = $.getJSON "/api/location/#{@address}"
         getting.success (json) =>
           form.setLocation(json.latitude, json.longitude)
+        getting.error (e) =>
+          message.setError(e.responseText)
+
 
 names = (form) ->
   new Vue

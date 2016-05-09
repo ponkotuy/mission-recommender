@@ -45,7 +45,7 @@ trait MissionWithPortals extends Mission {
   def portals: Seq[Portal]
   def state: Option[MissionState]
 
-  lazy val portalDistance = portals.sliding(2).map { case Seq(x, y) =>
+  lazy val portalDistance = portals.sliding(2).filterNot(_.size < 2).map { case Seq(x, y) =>
     x.location.distance(y.location)
   }.sum
 

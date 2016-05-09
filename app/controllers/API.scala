@@ -55,7 +55,7 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
     futureRecover(res)
   }
 
-  def futureRecover(f: Future[Result]): Future[Result] = f.recover { case e =>
+  private def futureRecover(f: Future[Result]): Future[Result] = f.recover { case e =>
     Logger.warn("Raise error in future", e)
     InternalServerError(e.getMessage)
   }
@@ -79,7 +79,7 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
   }
 
   def location(name: String) = StackAction { _ =>
-    geocoding.request(name).headOption.fold(NotFound("")) { geo =>
+    geocoding.request(name).headOption.fold(NotFound("Not found")) { geo =>
       val location = geo.geometry.location
       Ok(Json.obj("latitude" -> location.lat, "longitude" -> location.lng))
     }

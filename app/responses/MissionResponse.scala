@@ -15,7 +15,7 @@ object MissionResponse {
 
   implicit val responseReads: Reads[MissionResponse] = (
       (JsPath \ "rid").read[Int] and
-      (JsPath \ "mission").read[Seq[JSMission]]
+      (JsPath \ "mission").readNullable[Seq[JSMission]].map(_.getOrElse(Nil))
     )(MissionResponse.apply _)
 
   def get(params: Map[String, String])(implicit ec: ExecutionContext, ws: WSClient): Future[MissionResponse] = {
