@@ -1,5 +1,7 @@
 package utils
 
+import scala.collection.immutable
+
 
 case class Location(lat: Double, lng: Double) {
   def distance(other: Location): Double = Distance.periodLocation(this, other)
@@ -23,27 +25,15 @@ case class Vector(latMeter: Double, lngMeter: Double) {
   lazy val distance = math.sqrt(latMeter * latMeter + lngMeter * lngMeter)
   def bearing = {
     val raw = math.atan2(lngMeter, latMeter) * 180 / math.Pi
-    Bearing(if(raw < 0 ) raw + 360 else raw)
+    Bearing(if(raw < 0) raw + 360 else raw)
   }
 }
 
+/** 0 <= value <= 360 */
 case class Bearing(value: Double) {
-  def points16 = ((value + (360.0 / 32.0)) / (360.0 / 16.0)).toInt match {
-    case 0 => "N"
-    case 1 => "NNE"
-    case 2 => "NE"
-    case 3 => "ENE"
-    case 4 => "E"
-    case 5 => "ESE"
-    case 6 => "SE"
-    case 7 => "SSE"
-    case 8 => "S"
-    case 9 => "SSW"
-    case 10 => "SW"
-    case 11 => "WSW"
-    case 12 => "W"
-    case 13 => "WNW"
-    case 14 => "NW"
-    case 15 => "NNW"
-  }
+  def points16 = Bearing.values(((value + (360.0 / 32.0)) / (360.0 / 16.0)).toInt)
+}
+
+object Bearing {
+  val values = immutable.Vector("N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N")
 }
