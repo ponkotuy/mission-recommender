@@ -11,13 +11,14 @@ import play.api.mvc.{Controller, Result}
 import play.api.{Configuration, Logger}
 import responses.MissionResponse
 import scalikejdbc.{AutoSession, DB}
-import utils.{GoogleMaps, Location}
+import utils.{Config, GoogleMaps, Location}
 
 import scala.collection.breakOut
 import scala.concurrent.{ExecutionContext, Future}
 
 class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configuration) extends Controller with AuthenticationElement with AuthConfigImpl {
-  lazy val maps = new GoogleMaps(config.getString("google.maps.key").get)
+  lazy val conf = new Config(config)
+  lazy val maps = new GoogleMaps(conf.googleMapsKey)
 
   def missions(lat: Double, lng: Double, meter: Int, q: String) = AsyncStack { implicit req =>
     val user = loggedIn
