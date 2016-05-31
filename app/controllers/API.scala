@@ -3,21 +3,21 @@ package controllers
 import com.google.inject.Inject
 import jp.t2v.lab.play2.auth.AuthenticationElement
 import models.MissionState
-import play.api.{Configuration, Logger}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Result}
+import play.api.{Configuration, Logger}
 import responses.MissionResponse
 import scalikejdbc.{AutoSession, DB}
-import utils.{Geocoding, Location}
+import utils.{GoogleMaps, Location}
 
 import scala.collection.breakOut
 import scala.concurrent.{ExecutionContext, Future}
 
 class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configuration) extends Controller with AuthenticationElement with AuthConfigImpl {
-  lazy val geocoding = new Geocoding(config.getString("google.maps.key").get)
+  lazy val maps = new GoogleMaps(config.getString("google.maps.key").get)
 
   def missions(lat: Double, lng: Double, meter: Int, q: String) = AsyncStack { implicit req =>
     val user = loggedIn
@@ -79,7 +79,7 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
   }
 
   def location(name: String) = StackAction { _ =>
-    geocoding.request(name).headOption.fold(NotFound("Not found")) { geo =>
+    maps.geocoding.request(name).headOption.fold(NotFound("Not found")) { geo =>
       val location = geo.geometry.location
       Ok(Json.obj("latitude" -> location.lat, "longitude" -> location.lng))
     }
