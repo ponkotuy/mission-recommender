@@ -9,7 +9,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Result}
 import play.api.{Configuration, Logger}
-import responses.MissionResponse
+import responses.{JSMissionWithPortals, MissionResponse}
 import scalikejdbc.{AutoSession, DB}
 import utils.{Config, GoogleMaps, Location}
 
@@ -46,14 +46,18 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
           m.withPortalFromWeb()
         }
     val res = Future.sequence(fromWebs).map { xs =>
-      DB localTx { implicit session =>
-        mRes.mission.foreach(_.saveIgnore())
-        xs.foreach(_.savePortals())
-      }
+      saveMissions(xs)
       val contents = (fromDBs ++ xs).map(_.recommend(here)).sorted
       Ok(Json.toJson(contents))
     }
     futureRecover(res)
+  }
+
+  private def saveMissions(xs: Seq[JSMissionWithPortals]): Unit = {
+    DB localTx { implicit session =>
+      xs.foreach(_.saveIgnore())
+      xs.foreach(_.savePortals())
+    }
   }
 
   private def futureRecover(f: Future[Result]): Future[Result] = f.recover { case e =>
