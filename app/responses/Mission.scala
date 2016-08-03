@@ -63,6 +63,7 @@ trait MissionWithPortals extends Mission {
       here.distance(location),
       portalDistance,
       state.exists(_.isClear),
+      state.exists(_.notFound),
       state.map(_.feedback).getOrElse(0),
       here.vector(location).bearing.points16,
       portals.size

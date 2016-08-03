@@ -9,6 +9,7 @@ case class Recommend(
     to: Double,
     around: Double,
     isClear: Boolean,
+    notFound: Boolean,
     feedback: Int,
     bearing: String,
     portalCount: Int
@@ -24,6 +25,7 @@ object Recommend {
       "to" -> x.to,
       "around" -> x.around,
       "isClear" -> x.isClear,
+      "notFound" -> x.notFound,
       "feedback" -> x.feedback,
       "bearing" -> x.bearing,
       "portalCount" -> x.portalCount
@@ -31,6 +33,6 @@ object Recommend {
   }
 
   val ordering: Ordering[Recommend] = Ordering.by { r =>
-    if(r.isClear || r.feedback < 0) Double.MaxValue else if(r.feedback > 0) 0 else r.to * 2 + r.around
+    if(r.isClear || r.feedback < 0 || r.notFound) Double.MaxValue else if(r.feedback > 0) 0 else r.to * 2 + r.around
   }
 }

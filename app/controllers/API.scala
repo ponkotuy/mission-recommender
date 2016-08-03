@@ -1,10 +1,9 @@
 package controllers
 
 import com.google.inject.Inject
+import forms.Feedback
 import jp.t2v.lab.play2.auth.AuthenticationElement
 import models.MissionState
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Result}
@@ -73,11 +72,11 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
 
   def missionFeedback(id: Int) = StackAction { implicit req =>
     val user = loggedIn
-    val form = Form("feedback" -> number)
-    form.bindFromRequest().fold(
+    Feedback.form.bindFromRequest().fold(
       _ => BadRequest("Required feedback parameter"),
       f => {
-        MissionState.updateFeedback(id, user.id, f)(AutoSession)
+        f.feedback.foreach(MissionState.updateFeedback(id, user.id, _)(AutoSession))
+        f.notFound.foreach(MissionState.updateNotFound(id, user.id, _)(AutoSession))
         Ok("Success")
       }
     )

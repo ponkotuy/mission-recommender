@@ -13,23 +13,29 @@ recommends = (message) ->
       missions: []
     methods:
       getMission: (params) ->
-        getting = $.getJSON '/api/missions', params
-        getting.success (json) =>
+        $.getJSON('/api/missions', params)
+        .done (json) =>
           @missions = json
           if @missions.length == 0
             message.setError('Not found mission.')
           else
             message.removeError()
-        getting.error (error) =>
+        .fail (error) =>
           if error.status == 403
             location.href = '/session'
           message.setError(error.responseText)
       clear: (idx) ->
         $.post "/api/mission/#{@missions[idx].id}/clear"
-        @missions[idx].isClear = true
+        .done =>
+          @missions[idx].isClear = true
       feedback: (idx, v) ->
         $.post "/api/mission/#{@missions[idx].id}/feedback", {feedback: v}
-        @missions[idx].feedback += v
+        .done =>
+          @missions[idx].feedback += v
+      notFound: (idx) ->
+        $.post "/api/mission/#{@missions[idx].id}/feedback", {notFound: true}
+        .done =>
+          @missions[idx].notFound = true
       allClear: ->
         console.log("recommend.allClear")
         @clear(i) for i in [0..@missions.length - 1]
@@ -78,10 +84,10 @@ locations = (form, message) ->
       address: ""
     methods:
       search: ->
-        getting = $.getJSON "/api/location/#{@address}"
-        getting.success (json) =>
+        $.getJSON "/api/location/#{@address}"
+        .done (json) =>
           form.setLocation(json.latitude, json.longitude)
-        getting.error (e) =>
+        .fail (e) =>
           message.setError(e.responseText)
 
 
