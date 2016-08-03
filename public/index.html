@@ -67,11 +67,12 @@
       </form>
 
       <table class="table table-striped table-condensed" id="recommend">
-        <tr><th>Name</th><th>To</th><th>Around</th><th></th></tr>
+        <tr><th>Name</th><th>To</th><th>Around</th><th>Portal</th><th></th></tr>
         <tr v-for="m in missions">
           <td>{{ m.name }}</td>
           <td>{{ m.bearing }} {{ m.to.toFixed(1) }} m</td>
           <td>{{ m.around.toFixed(1) }} m</td>
+          <td>{{ m.portalCount }}</td>
           <td>
             <button type="button" class="btn btn-xs" @click="clear($index)" v-if="!m.isClear">Clear</button>
             <button type="button" class="btn btn-xs" @click="feedback($index, 1)" v-if="m.feedback <= 0">
