@@ -12,7 +12,7 @@ case class Recommend(
     notFound: Boolean,
     feedback: Int,
     bearing: String,
-    portalCount: Int
+    portals: Seq[Portal]
 ) extends Ordered[Recommend] {
   override def compare(that: Recommend): Int = Recommend.ordering.compare(this, that)
 }
@@ -28,7 +28,7 @@ object Recommend {
       "notFound" -> x.notFound,
       "feedback" -> x.feedback,
       "bearing" -> x.bearing,
-      "portalCount" -> x.portalCount
+      "portals" -> x.portals
     )
   }
 

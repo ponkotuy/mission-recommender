@@ -1,5 +1,6 @@
 
 GET / controllers.Assets.at(path="/public", file="index.html")
+GET /html/*file controllers.Assets.at(path="/public", file)
 GET /session controllers.Session.view()
 POST /session controllers.Session.login()
 

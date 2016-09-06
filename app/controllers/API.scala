@@ -22,16 +22,17 @@ class API @Inject()(implicit ec: ExecutionContext, ws: WSClient, config: Configu
   def missions(lat: Double, lng: Double, meter: Int, q: String) = AsyncStack { implicit req =>
     val user = loggedIn
     val here = Location(lat, lng)
-    if(q.isEmpty) localMissions(user.id, here, meter) else searchMissions(user.id, here, q)
+    val missions = if(q.isEmpty) localMissions(here, meter) else searchMissions(q)
+    missions.flatMap( mRes => createResult(mRes, user.id, here))
   }
 
-  private def localMissions(userId: Long, here: Location, meter: Int): Future[Result] = {
+  private def localMissions(here: Location, meter: Int): Future[MissionResponse] = {
     val region = here.regionFromMeter(meter)
-    MissionResponse.get(here, region).flatMap { mRes => createResult(mRes, userId, here) }
+    MissionResponse.get(here, region)
   }
 
-  private def searchMissions(userId: Long, here: Location, q: String): Future[Result] = {
-    MissionResponse.find(q).flatMap( mRes => createResult(mRes, userId, here))
+  private def searchMissions(q: String): Future[MissionResponse] = {
+    MissionResponse.find(q)
   }
 
   private def createResult(mRes: MissionResponse, userId: Long, here: Location): Future[Result] = {

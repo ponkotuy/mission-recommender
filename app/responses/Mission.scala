@@ -66,6 +66,6 @@ trait MissionWithPortals extends Mission {
       state.exists(_.notFound),
       state.map(_.feedback).getOrElse(0),
       here.vector(location).bearing.points16,
-      portals.size
+      portals
     )
 }

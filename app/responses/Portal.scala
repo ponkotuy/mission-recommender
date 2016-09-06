@@ -1,6 +1,7 @@
 package responses
 
 import models.RDBPortal
+import play.api.libs.json.{JsValue, Json, Writes}
 import scalikejdbc.DBSession
 import utils.Location
 
@@ -18,5 +19,16 @@ trait Portal {
 
   def save()(implicit session: DBSession) = {
     RDBPortal.createWithAttributes('id -> id, 'name -> name, 'latitude -> latitude, 'longitude -> longitude, 'typ -> typ)
+  }
+}
+object Portal {
+  implicit val portalWrites = new Writes[Portal] {
+    override def writes(p: Portal): JsValue = Json.obj(
+      "id" -> p.id,
+      "name" -> p.name,
+      "latitude" -> p.latitude,
+      "longitude" -> p.longitude,
+      "type" -> p.typ
+    )
   }
 }

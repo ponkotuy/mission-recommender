@@ -1,12 +1,14 @@
 $(document).ready ->
   message = messages()
-  recommend = recommends(message)
+  mapModal = new MapController('#map')
+  mapForm = mapForms(mapModal)
+  recommend = recommends(message, mapModal)
   form = forms(recommend)
   location = locations(form, message)
   name = names(form, message)
   allClear = allClears(recommend)
 
-recommends = (message) ->
+recommends = (message, mapModal) ->
   new Vue
     el: '#recommend'
     data:
@@ -16,6 +18,7 @@ recommends = (message) ->
         $.getJSON('/api/missions', params)
         .done (json) =>
           @missions = json
+          mapModal.setMissionHeader(@missions, params.meter)
           if @missions.length == 0
             message.setError('Not found mission.')
           else
@@ -39,7 +42,8 @@ recommends = (message) ->
       allClear: ->
         console.log("recommend.allClear")
         @clear(i) for i in [0..@missions.length - 1]
-
+      openMap: (mission) ->
+        mapModal.setMission(mission)
 
 forms = (recommend) ->
   new Vue
@@ -106,3 +110,10 @@ allClears = (recommend) ->
     methods:
       allClear: ->
         recommend.allClear()
+
+mapForms = (mapModal) ->
+  new Vue
+    el: '#map_form'
+    methods:
+      clear: ->
+        mapModal.clear()
