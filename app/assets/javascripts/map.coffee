@@ -25,6 +25,7 @@ class @MyMap
 
 class @MapController
   constructor: (@mapId) ->
+    $('#map').css('width', window.innerWidth - 240)
     @map = new MyMap('map')
     @lastHeader = {missions: [], meter: 0}
 
@@ -41,9 +42,11 @@ class @MapController
     zoom = adjustZoomLevel(meter)
     first = missions[0].portals[0]
     @map.setView(first, zoom)
-    markers = missions.map (m) ->
+    markers = missions.map (m) =>
       first = m.portals[0]
-      L.marker([first.latitude, first.longitude]).bindPopup(m.name)
+      marker = L.marker([first.latitude, first.longitude]).bindPopup(m.name)
+      marker.on 'click', => @setMission(m)
+      marker
     @map.addMarkers(markers)
     @lastHeader = {missions: missions, meter: meter}
 
