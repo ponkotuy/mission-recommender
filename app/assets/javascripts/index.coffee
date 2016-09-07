@@ -23,7 +23,7 @@ recommends = (message, mapModal) ->
             message.setError('Not found mission.')
           else
             message.removeError()
-        .fail (error) =>
+        .fail (error) ->
           if error.status == 403
             location.href = '/session'
           message.setError(error.responseText)
@@ -89,9 +89,9 @@ locations = (form, message) ->
     methods:
       search: ->
         $.getJSON "/api/location/#{@address}"
-        .done (json) =>
+        .done (json) ->
           form.setLocation(json.latitude, json.longitude)
-        .fail (e) =>
+        .fail (e) ->
           message.setError(e.responseText)
 
 
