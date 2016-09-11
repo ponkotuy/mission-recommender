@@ -3,12 +3,10 @@ class @MyMap
     @markers = []
     @map = L.map(@mapId)
     tiles = L.tileLayer(
-      'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+      'http://{s}.maps.ponkotuy.com/maps/{z}/{x}/{y}.png',
       {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}
     )
     @map.addLayer(tiles)
-    for m in [L.marker([35.67849, 139.681319])]
-      m.addTo(@map)
 
   addMarkers: (ms) ->
     @markers = @markers.concat(ms)
@@ -25,7 +23,8 @@ class @MyMap
 
 class @MapController
   constructor: (@mapId) ->
-    $('#map').css('width', window.innerWidth - 240)
+    width = $('div.container').offsetWidth
+    $('#map').css('width', width)
     @map = new MyMap('map')
     @lastHeader = {missions: [], meter: 0}
 
