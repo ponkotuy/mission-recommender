@@ -1,14 +1,12 @@
 $(document).ready ->
   message = messages()
-  mapModal = new MapController('#map')
-  mapForm = mapForms(mapModal)
-  recommend = recommends(message, mapModal)
+  recommend = recommends(message)
   form = forms(recommend)
   location = locations(form, message)
   name = names(form, message)
   allClear = allClears(recommend)
 
-recommends = (message, mapModal) ->
+recommends = (message) ->
   new Vue
     el: '#recommend'
     data:
@@ -18,7 +16,6 @@ recommends = (message, mapModal) ->
         $.getJSON('/api/missions', params)
         .done (json) =>
           @missions = json
-          mapModal.setMissionHeader(@missions, params.meter)
           if @missions.length == 0
             message.setError('Not found mission.')
           else
@@ -42,8 +39,12 @@ recommends = (message, mapModal) ->
       allClear: ->
         console.log("recommend.allClear")
         @clear(i) for i in [0..@missions.length - 1]
-      openMap: (mission) ->
-        mapModal.setMission(mission)
+      zoom: (meter) ->
+        adjustZoomLevel(meter)
+      jsonPortals: (portals) ->
+        JSON.stringify([p.latitude, p.longitude] for p in portals)
+      firstPortals: ->
+        m.portals[0] for m in @missions
 
 forms = (recommend) ->
   new Vue
@@ -94,7 +95,6 @@ locations = (form, message) ->
         .fail (e) ->
           message.setError(e.responseText)
 
-
 names = (form) ->
   new Vue
     el: '#name'
@@ -111,9 +111,13 @@ allClears = (recommend) ->
       allClear: ->
         recommend.allClear()
 
-mapForms = (mapModal) ->
-  new Vue
-    el: '#map_form'
-    methods:
-      clear: ->
-        mapModal.clear()
+Scales = [
+  500000000, 250000000, 150000000, 70000000, 35000000, 15000000, 10000000, 4000000, 2000000, 1000000,
+  500000, 250000, 150000, 70000, 35000, 15000, 8000, 4000, 2000, 1000
+]
+
+adjustZoomLevel = (meter) ->
+  for rate, zoom in Scales
+    if rate / 25 < meter
+      return zoom
+  return 19

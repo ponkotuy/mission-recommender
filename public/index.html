@@ -11,13 +11,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
-    <script src="/js/map.js"></script>
     <script src="/js/index.js"></script>
-    <style>
-      .clickable {
-        cursor: pointer;
-      }
-    </style>
     <title>Ingress Mission Recommender</title>
   </head>
   <body>
@@ -74,32 +68,33 @@
         <button type="button" class="btn btn-default" @click="search()">Search</button>
       </form>
 
-      <div id="map" style="height: 480px;"></div>
-      <form id="map_form">
-        <button type="button" class="btn btn-default pull-right" @click="clear()">MapClear</button>
-      </form>
+      <div id="recommend">
+        <form id="map_form">
+          <a class="pull-right" target="_blank" href="/html/map.html?lat={{missions[0].portals[0].latitude}}&lng={{missions[0].portals[0].longitude}}&zoom=16&points={{jsonPortals(firstPortals())}}&name=MissionMap">MissionsMap</a>
+        </form>
 
-      <table class="table table-striped table-condensed" id="recommend">
-        <tr><th>Name</th><th>To</th><th>Around</th><th>Portal</th><th></th></tr>
-        <tr class="clickable" v-for="m in missions" @click="openMap(m)">
-          <td>{{ m.name }}</td>
-          <td>{{ m.bearing }} {{ m.to.toFixed(1) }} m</td>
-          <td>{{ m.around.toFixed(1) }} m</td>
-          <td>{{ m.portals.length }}</td>
-          <td>
-            <button type="button" class="btn btn-xs" @click="clear($index)" v-if="!m.isClear">Clear</button>
-            <button type="button" class="btn btn-xs" @click="feedback($index, 1)" v-if="m.feedback <= 0">
-              <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
-            </button>
-            <button type="button" class="btn btn-xs" @click="feedback($index, -1)" v-if="0 <= m.feedback">
-              <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
-            </button>
-            <button type="button" class="btn btn-xs" @click="notFound($index)" v-if="!m.notFound">
-              NotFound
-            </button>
-          </td>
-        </tr>
-      </table>
+        <table class="table table-striped table-condensed">
+          <tr><th>Name</th><th>To</th><th>Around</th><th>Portal</th><th></th></tr>
+          <tr v-for="m in missions">
+            <td><a target="_blank" href="/html/map.html?lat={{m.portals[0].latitude}}&lng={{m.portals[0].longitude}}&zoom={{zoom(m.around)}}&points={{jsonPortals(m.portals)}}&name={{m.name}}">{{ m.name }}</a></td>
+            <td>{{ m.bearing }} {{ m.to.toFixed(1) }} m</td>
+            <td>{{ m.around.toFixed(1) }} m</td>
+            <td>{{ m.portals.length }}</td>
+            <td>
+              <button type="button" class="btn btn-xs" @click="clear($index)" v-if="!m.isClear">Clear</button>
+              <button type="button" class="btn btn-xs" @click="feedback($index, 1)" v-if="m.feedback <= 0">
+                <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="btn btn-xs" @click="feedback($index, -1)" v-if="0 <= m.feedback">
+                <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="btn btn-xs" @click="notFound($index)" v-if="!m.notFound">
+                NotFound
+              </button>
+            </td>
+          </tr>
+        </table>
+      </div>
 
       <form id="all_clear" @submit.prevent="allClear()">
         <button type="button" class="btn btn-xs btn-warning" @click="allClear()">ALL CLEAR</button>
