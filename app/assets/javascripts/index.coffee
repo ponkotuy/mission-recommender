@@ -45,6 +45,11 @@ recommends = (message) ->
         JSON.stringify([p.latitude, p.longitude] for p in portals)
       firstPortals: ->
         m.portals[0] for m in @missions
+      mapUrl: (zoom, portals, name) ->
+        jPoints = @jsonPortals(portals)
+        p = portals[0]
+        "/html/map.html?lat=#{p.latitude}&lng=#{p.longitude}&zoom=#{zoom}&points=#{jPoints}&name=#{name}"
+
 
 forms = (recommend) ->
   new Vue
@@ -66,7 +71,7 @@ forms = (recommend) ->
         @change()
       searchName: (name) ->
         recommend.getMission({lat: @pos.lat, lng: @pos.lng, q: name})
-    ready: ->
+    mounted: ->
       @gps()
 
 messages = ->
