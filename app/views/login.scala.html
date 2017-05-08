@@ -4,7 +4,7 @@
   <title>Login</title>
 } {
   <div class="container" role="main">
-    @helper.form(action = routes.Session.login()) {
+    @helper.form(action = routes.SessionController.login()) {
       <div class="form-group">
         @helper.inputText(form("name"), 'id -> "name", 'class -> "form-control", 'autofocus -> "")
       </div>

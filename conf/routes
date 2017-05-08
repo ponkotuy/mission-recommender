@@ -1,8 +1,8 @@
 
 GET / controllers.Assets.at(path="/public", file="index.html")
 GET /html/*file controllers.Assets.at(path="/public", file)
-GET /session controllers.Session.view()
-POST /session controllers.Session.login()
+GET /session controllers.SessionController.view()
+POST /session controllers.SessionController.login()
 
 GET /api/missions controllers.API.missions(lat: Double, lng: Double, meter: Int ?= 200, q: String ?= "")
 POST /api/mission/:id/clear controllers.API.missionClear(id: Int)

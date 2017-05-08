@@ -10,7 +10,7 @@ import utils.Tools
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Session @Inject()(val messagesApi: MessagesApi, implicit val ec: ExecutionContext) extends Controller with LoginLogout with AuthConfigImpl with I18nSupport {
+class SessionController @Inject()(val messagesApi: MessagesApi, implicit val ec: ExecutionContext) extends Controller with LoginLogout with AuthConfigImpl with I18nSupport {
   def view() = Action {
     Ok(views.html.login(Login.form))
   }

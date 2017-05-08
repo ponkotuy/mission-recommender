@@ -1,6 +1,6 @@
 package controllers
 
-import jp.t2v.lab.play2.auth.{AuthConfig, CookieTokenAccessor}
+import jp.t2v.lab.play2.auth.{AsyncIdContainer, AuthConfig, CookieTokenAccessor}
 import models.Account
 import play.api.mvc.Results._
 import play.api.mvc.{RequestHeader, Result}
@@ -13,8 +13,11 @@ trait AuthConfigImpl extends AuthConfig {
   override type Id = Long
   override type User = Account
   override type Authority = Unit
+
+  override lazy val idContainer = AsyncIdContainer(new SessionContainer())
+
   override val idTag: ClassTag[Id] = classTag[Id]
-  override val sessionTimeoutInSeconds = 7.days.toSeconds.toInt
+  override val sessionTimeoutInSeconds: Int = 7.days.toSeconds.toInt
 
   override def resolveUser(id: Id)(implicit ec: ExecutionContext): Future[Option[User]] =
     Future.successful(Account.findById(id))
@@ -35,6 +38,6 @@ trait AuthConfigImpl extends AuthConfig {
     Future.successful(Forbidden("Authentication failed"))
 
   override lazy val tokenAccessor = new CookieTokenAccessor(
-    cookieSecureOption = false
+    cookieMaxAge = Some(sessionTimeoutInSeconds)
   )
 }
