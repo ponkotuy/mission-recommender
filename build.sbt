@@ -25,3 +25,7 @@ import utils.Tools._
 import scalikejdbc.config.DBs
 DBs.setupAll()
 """
+
+// Docker settings
+dockerRepository := Some("ponkotuy")
+dockerUpdateLatest := true
