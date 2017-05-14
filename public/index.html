@@ -75,20 +75,20 @@
 
         <table class="table table-striped table-condensed">
           <tr><th>Name</th><th>To</th><th>Around</th><th>Portal</th><th></th></tr>
-          <tr v-for="m in missions">
+          <tr v-for="(m, idx) in missions">
             <td><a target="_blank" :href="mapUrl(zoom(m.around), m.portals, m.name)">{{ m.name }}</a></td>
             <td>{{ m.bearing }} {{ m.to.toFixed(1) }} m</td>
             <td>{{ m.around.toFixed(1) }} m</td>
             <td>{{ m.portals.length }}</td>
             <td>
-              <button type="button" class="btn btn-xs" @click="clear($index)" v-if="!m.isClear">Clear</button>
-              <button type="button" class="btn btn-xs" @click="feedback($index, 1)" v-if="m.feedback <= 0">
+              <button type="button" class="btn btn-xs" @click="clear(idx)" v-if="!m.isClear">Clear</button>
+              <button type="button" class="btn btn-xs" @click="feedback(idx, 1)" v-if="m.feedback <= 0">
                 <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
               </button>
-              <button type="button" class="btn btn-xs" @click="feedback($index, -1)" v-if="0 <= m.feedback">
+              <button type="button" class="btn btn-xs" @click="feedback(idx, -1)" v-if="0 <= m.feedback">
                 <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
               </button>
-              <button type="button" class="btn btn-xs" @click="notFound($index)" v-if="!m.notFound">
+              <button type="button" class="btn btn-xs" @click="notFound(idx)" v-if="!m.notFound">
                 NotFound
               </button>
             </td>
