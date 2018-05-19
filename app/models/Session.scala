@@ -10,10 +10,11 @@ case class Session(
     created: Long,
     expire: Long
 ) {
-
   def save()(implicit db: DBSession): Long = {
     if (id <= 0) Session.create(this) else Session.update(this)
   }
+
+  def toSession: Seq[(String, String)] = Seq("token" -> token)
 }
 
 object Session extends SkinnyCRUDMapperWithId[Long, Session] {

@@ -1,30 +1,21 @@
 package controllers
 
-import com.google.inject.Inject
 import forms.Login
-import jp.t2v.lab.play2.auth.LoginLogout
-import models.Account
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, Controller, RequestHeader, Result}
-import utils.Tools
+import javax.inject.Inject
+import play.api.i18n.MessagesProvider
+import play.api.mvc.{InjectedController, MessagesActionBuilder}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-class SessionController @Inject()(val messagesApi: MessagesApi, implicit val ec: ExecutionContext) extends Controller with LoginLogout with AuthConfigImpl with I18nSupport {
-  def view() = Action {
+class SessionController @Inject()(implicit val ec: ExecutionContext, messageAction: MessagesActionBuilder) extends InjectedController {
+  def view() = messageAction { implicit req =>
     Ok(views.html.login(Login.form))
   }
 
-  def login() = Action.async { implicit req =>
+  def login() = Action { implicit req =>
     Login.form.bindFromRequest().fold(
-      errors => Future.successful(BadRequest(errors.errors.mkString("\n"))),
-      authenticate
+      errors => BadRequest(errors.errors.mkString("\n")),
+      Authentication.authenticate
     )
-  }
-
-  private def authenticate(login: Login)(implicit req: RequestHeader): Future[Result] = {
-    Account.where('name -> login.name).apply().headOption.flatMap { account =>
-      if(Tools.toHash(login.password, account.salt) sameElements account.hash) Some(gotoLoginSucceeded(account.id)) else None
-    }.getOrElse(Future.successful(Unauthorized("Authentication failed")))
   }
 }
