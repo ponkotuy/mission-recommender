@@ -37,7 +37,6 @@ recommends = (message) ->
         .done =>
           @missions[idx].notFound = true
       allClear: ->
-        console.log("recommend.allClear")
         @clear(i) for i in [0..@missions.length - 1]
       zoom: (meter) ->
         adjustZoomLevel(meter)

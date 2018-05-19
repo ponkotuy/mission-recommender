@@ -8,8 +8,6 @@ $(document).ready ->
   if params.points
     xs = JSON.parse(params.points)
     markers = (L.marker(x) for x in xs)
-    console.log(xs)
-    console.log(markers)
     map.addMarkers(markers)
   if params.name
     document.title = decodeURI(params.name)
@@ -19,7 +17,7 @@ class MyMap
     @markers = []
     @map = L.map(@mapId)
     tiles = L.tileLayer(
-      'http://{s}.maps.ponkotuy.com/maps/{z}/{x}/{y}.png',
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}
     )
     @map.addLayer(tiles)
