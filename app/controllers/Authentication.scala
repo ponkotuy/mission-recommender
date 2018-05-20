@@ -2,13 +2,12 @@ package controllers
 
 import forms.Login
 import models.Account
-import play.api.mvc.{Cookie, RequestHeader, Result, Session}
-import play.filters.csrf.CSRF
+import play.api.mvc.{RequestHeader, Result, Session}
 import scalikejdbc.{AutoSession, DB}
 import utils.Tools
 
-import scala.util.Random
 import scala.concurrent.duration._
+import scala.util.Random
 
 object Authentication {
   import play.api.mvc.Results._
@@ -33,10 +32,6 @@ object Authentication {
         Some(Redirect("/").withSession(session.toSession:_*))
       } else None
     }.getOrElse(Unauthorized("Authentication failed"))
-  }
-
-  def csrfCookie()(implicit req: RequestHeader): Option[Cookie] = CSRF.getToken(req).map { token =>
-    Cookie("CSRF_TOKEN", token.value, secure = false, httpOnly = false)
   }
 
   val Chars = "abcdefghijklmnopqrstuvwxyz_0123456789"
