@@ -25,15 +25,15 @@ recommends = (message) ->
             location.href = '/session'
           message.setError(error.responseText)
       clear: (idx) ->
-        $.post "/api/mission/#{@missions[idx].id}/clear"
+        $.post "/api/mission/#{@missions[idx].id}/clear?csrfToken=#{@csrfToken()}"
         .done =>
           @missions[idx].isClear = true
       feedback: (idx, v) ->
-        $.post "/api/mission/#{@missions[idx].id}/feedback", {feedback: v}
+        $.post "/api/mission/#{@missions[idx].id}/feedback?csrfToken=#{@csrfToken()}", {feedback: v}
         .done =>
           @missions[idx].feedback += v
       notFound: (idx) ->
-        $.post "/api/mission/#{@missions[idx].id}/feedback", {notFound: true}
+        $.post "/api/mission/#{@missions[idx].id}/feedback?csrfToken=#{@csrfToken()}", {notFound: true}
         .done =>
           @missions[idx].notFound = true
       allClear: ->
@@ -48,7 +48,8 @@ recommends = (message) ->
         jPoints = @jsonPortals(portals)
         p = portals[0]
         "/html/map.html?lat=#{p.latitude}&lng=#{p.longitude}&zoom=#{zoom}&points=#{jPoints}&name=#{name}"
-
+      csrfToken: ->
+        Cookies.get('CSRF_TOKEN')
 
 forms = (recommend) ->
   new Vue

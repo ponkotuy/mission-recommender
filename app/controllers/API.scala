@@ -5,7 +5,7 @@ import javax.inject.Inject
 import models.MissionState
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import play.api.mvc.{InjectedController, Result, Results}
+import play.api.mvc.{InjectedController, RequestHeader, Result, Results}
 import play.api.{Configuration, Logger}
 import responses.{JSMissionWithPortals, MissionResponse}
 import scalikejdbc.{AutoSession, DB}
@@ -68,7 +68,7 @@ object API {
     MissionResponse.find(q)
   }
 
-  private def createResult(mRes: MissionResponse, userId: Long, here: Location)(implicit ec: ExecutionContext, ws: WSClient): Future[Result] = {
+  private def createResult(mRes: MissionResponse, userId: Long, here: Location)(implicit ec: ExecutionContext, ws: WSClient, req: RequestHeader): Future[Result] = {
     import responses.Recommend.recommendWrites
     val fromDBs = mRes.mission.flatMap(_.withPortalFromDB(userId)(AutoSession))
     val exists: Set[Int] = fromDBs.map(_.id)(breakOut)
@@ -81,7 +81,7 @@ object API {
     val res = Future.sequence(fromWebs).map { xs =>
       saveMissions(xs)
       val contents = (fromDBs ++ xs).map(_.recommend(here)).sorted
-      Ok(Json.toJson(contents))
+      Ok(Json.toJson(contents)).withCookies(Authentication.csrfCookie().get)
     }
     futureRecover(res)
   }

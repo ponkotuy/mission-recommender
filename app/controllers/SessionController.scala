@@ -2,7 +2,6 @@ package controllers
 
 import forms.Login
 import javax.inject.Inject
-import play.api.i18n.MessagesProvider
 import play.api.mvc.{InjectedController, MessagesActionBuilder}
 
 import scala.concurrent.ExecutionContext

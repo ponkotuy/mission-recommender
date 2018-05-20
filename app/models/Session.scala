@@ -26,7 +26,7 @@ object Session extends SkinnyCRUDMapperWithId[Long, Session] {
   override def extract(rs: WrappedResultSet, n: ResultName[Session]): Session = autoConstruct(rs, n)
 
   def findByToken(token: String)(implicit db: DBSession): Option[Session] =
-    findBy(sqls.eq(defaultAlias.token, token))
+    findBy(sqls.eq(defaultAlias.token, token).and.gt(defaultAlias.expire, System.currentTimeMillis()))
 
   def create(se: Session)(implicit db: DBSession): Long =
     createWithAttributes(params(se): _*)

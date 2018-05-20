@@ -2,7 +2,8 @@ package controllers
 
 import forms.Login
 import models.Account
-import play.api.mvc.{RequestHeader, Result, Session}
+import play.api.mvc.{Cookie, RequestHeader, Result, Session}
+import play.filters.csrf.CSRF
 import scalikejdbc.{AutoSession, DB}
 import utils.Tools
 
@@ -26,11 +27,16 @@ object Authentication {
   def authenticate(login: Login)(implicit req: RequestHeader): Result = {
     Account.where('name -> login.name).apply().headOption.flatMap { account =>
       if(Tools.toHash(login.password, account.salt) sameElements account.hash) {
-        val session = new models.Session(0L, account.id, generateToken(), System.currentTimeMillis(), 7.days.toMillis)
+        val now = System.currentTimeMillis()
+        val session = new models.Session(0L, account.id, generateToken(), now, now + 7.days.toMillis)
         session.save()(AutoSession)
         Some(Redirect("/").withSession(session.toSession:_*))
       } else None
     }.getOrElse(Unauthorized("Authentication failed"))
+  }
+
+  def csrfCookie()(implicit req: RequestHeader): Option[Cookie] = CSRF.getToken(req).map { token =>
+    Cookie("CSRF_TOKEN", token.value, secure = false, httpOnly = false)
   }
 
   val Chars = "abcdefghijklmnopqrstuvwxyz_0123456789"
