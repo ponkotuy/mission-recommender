@@ -76,7 +76,7 @@
 
         <table class="table table-striped table-condensed">
           <tr><th>Name</th><th>To</th><th>Around</th><th>Portal</th><th></th></tr>
-          <tr v-for="(m, idx) in missions">
+          <tr v-for="(m, idx) in missions" :class="{success: m.isClear, danger: m.feedback < 0, warning: m.notFound}">
             <td><a target="_blank" :href="mapUrl(zoom(m.around), m.portals, m.name)">{{ m.name }}</a></td>
             <td>{{ m.bearing }} {{ m.to.toFixed(1) }} m</td>
             <td>{{ m.around.toFixed(1) }} m</td>
